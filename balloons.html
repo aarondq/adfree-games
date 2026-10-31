@@ -1,0 +1,21 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Balloons</title><style>*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{margin:0;height:100%;background:#1f4a3a;color:#fff;font-family:Verdana,Arial,sans-serif;font-size:24px}
+.bar{display:flex;gap:10px;padding:8px;background:#163528;flex-wrap:wrap;align-items:center}
+.bar button,.bar a{font-size:26px;padding:12px 18px;border-radius:12px;border:3px solid #fff;background:#fdf6e3;color:#111;text-decoration:none;font-weight:bold;min-height:60px}
+.bar .msg{flex:1;min-width:200px;font-size:26px;text-align:center}
+.banner{display:none;margin:10px auto;max-width:700px;background:#fdf6e3;color:#111;border-radius:16px;padding:18px;text-align:center;font-size:28px}
+body{background:#bfe3f5;overflow:hidden}#sky{position:fixed;left:0;right:0;bottom:0;top:84px}
+.b{position:absolute;border-radius:50% 50% 48% 48%;box-shadow:inset -10px -10px 0 rgba(0,0,0,.15)}
+.b:after{content:"";position:absolute;left:50%;bottom:-40px;width:2px;height:40px;background:#555}
+</style></head><body><div class="bar"><a href="index.html">⌂ Menu</a><button id="new">New Game</button><button id="undo">↶ Undo</button><span class="msg" id="msg"></span><button id="snd">Sound: Off</button></div><div class="banner" id="banner"></div><div id="sky"></div><script>var sound=localStorage.getItem("judy_sound")==="1";function upS(){document.getElementById("snd").textContent="Sound: "+(sound?"On":"Off")}upS();document.getElementById("snd").onclick=function(){sound=!sound;localStorage.setItem("judy_sound",sound?"1":"0");upS()};var AC;function beep(f){if(!sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.frequency.value=f||660;g.gain.value=0.08;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+0.25);o.stop(AC.currentTime+0.3)}catch(e){}}function banner(t){var b=document.getElementById("banner");b.innerHTML=t||"";b.style.display=t?"block":"none"}
+var COL=["#e63946","#f4a261","#2a9d8f","#457b9d","#9b5de5","#ffb703","#06d6a0"];var popped=+localStorage.getItem("judy_bal")||0,last=[];
+var sky=document.getElementById("sky"),balls=[];document.getElementById("undo").style.display="none";
+function msg(){document.getElementById("msg").textContent="🎈 Popped: "+popped}msg();
+function add(){var s=Math.max(110,Math.min(innerWidth,innerHeight)*0.18);var d=document.createElement("div");d.className="b";d.style.width=s+"px";d.style.height=(s*1.2)+"px";d.style.background=COL[Math.random()*COL.length|0];
+var o={el:d,x:Math.random()*(innerWidth-s),y:innerHeight,v:0.4+Math.random()*0.5};d.style.left=o.x+"px";
+d.onpointerdown=function(){popped++;localStorage.setItem("judy_bal",popped);msg();beep(500+Math.random()*400);d.remove();balls.splice(balls.indexOf(o),1)};sky.appendChild(d);balls.push(o)}
+function step(){balls.slice().forEach(function(o){o.y-=o.v;o.el.style.top=o.y+"px";if(o.y<-300){o.el.remove();balls.splice(balls.indexOf(o),1)}});if(balls.length<6&&Math.random()<0.02)add();requestAnimationFrame(step)}
+for(var i=0;i<4;i++){add();balls[i].y=innerHeight*(0.3+i*0.15)}step();
+document.getElementById("new").onclick=function(){popped=0;localStorage.setItem("judy_bal",0);msg()};
+</script><script>if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js");</script>
+</body></html>

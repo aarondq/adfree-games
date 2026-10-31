@@ -1,0 +1,64 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Solitaire</title><style>*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{margin:0;height:100%;background:#1f4a3a;color:#fff;font-family:Verdana,Arial,sans-serif;font-size:24px}
+.bar{display:flex;gap:10px;padding:8px;background:#163528;flex-wrap:wrap;align-items:center}
+.bar button,.bar a{font-size:26px;padding:12px 18px;border-radius:12px;border:3px solid #fff;background:#fdf6e3;color:#111;text-decoration:none;font-weight:bold;min-height:60px}
+.bar .msg{flex:1;min-width:200px;font-size:26px;text-align:center}
+.banner{display:none;margin:10px auto;max-width:700px;background:#fdf6e3;color:#111;border-radius:16px;padding:18px;text-align:center;font-size:28px}
+#g{padding:8px;margin:auto}.row{display:flex;gap:1.2%;margin-bottom:12px}.slot{flex:1;position:relative}
+.c{position:absolute;left:0;right:0;border-radius:10px;border:2px solid #333;background:#fff;font-weight:bold;padding:2px 6px;line-height:1.05}
+.c.r{color:#c00000}.c.b{color:#000}.c.down{background:repeating-linear-gradient(45deg,#2b5a8a,#2b5a8a 8px,#3d74ad 8px,#3d74ad 16px);border-color:#fff}
+.c.e{background:transparent;border:3px dashed #8fb8a5;color:#8fb8a5;text-align:center}
+.c .big{display:block;text-align:center}
+</style></head><body><div class="bar"><a href="index.html">⌂ Menu</a><button id="new">New Game</button><button id="undo">↶ Undo</button><span class="msg" id="msg"></span><button id="snd">Sound: Off</button></div><div class="banner" id="banner"></div><div id="g"></div>
+<script>var SU=["♠","♥","♦","♣"],RK=["","A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+function red(c){return c.s===1||c.s===2}
+function ksDeal(rnd){rnd=rnd||Math.random;var d=[];for(var s=0;s<4;s++)for(var r=1;r<=13;r++)d.push({s:s,r:r,up:false});
+for(var i=d.length-1;i>0;i--){var j=Math.floor(rnd()*(i+1));var x=d[i];d[i]=d[j];d[j]=x}
+var st={tab:[[],[],[],[],[],[],[]],found:[[],[],[],[]],stock:[],waste:[]};
+for(var c=0;c<7;c++)for(var k=0;k<=c;k++){var card=d.pop();card.up=(k===c);st.tab[c].push(card)}
+st.stock=d;return st;}
+function canFound(c,st){var f=st.found[c.s];return f.length+1===c.r}
+function canTab(c,col){if(!col.length)return c.r===13;var t=col[col.length-1];return t.up&&red(t)!==red(c)&&t.r===c.r+1}
+function flip(st){st.tab.forEach(function(col){if(col.length&&!col[col.length-1].up)col[col.length-1].up=true})}
+// where: {from:"waste"} or {from:"tab",col,idx}; returns true if moved
+function ksTap(st,w){var src,cards;
+if(w.from==="waste"){if(!st.waste.length)return false;cards=[st.waste[st.waste.length-1]];src=st.waste}
+else if(w.from==="found"){var f=st.found[w.s];if(!f.length)return false;cards=[f[f.length-1]];src=f}
+else{src=st.tab[w.col];if(!src[w.idx]||!src[w.idx].up)return false;cards=src.slice(w.idx)}
+var c=cards[0];
+if(cards.length===1&&w.from!=="found"&&canFound(c,st)){src.pop();st.found[c.s].push(c);flip(st);return true}
+var order=[];for(var i=0;i<7;i++)if(!(w.from==="tab"&&i===w.col))order.push(i);
+order.sort(function(a,b){return (st.tab[a].length?0:1)-(st.tab[b].length?0:1)});
+for(i=0;i<order.length;i++){var col=st.tab[order[i]];if(canTab(c,col)){
+if(c.r===13&&w.from==="tab"&&w.idx===0&&!col.length)continue;
+src.splice(src.length-cards.length,cards.length);cards.forEach(function(x){col.push(x)});flip(st);return true}}return false}
+function ksDraw(st){if(st.stock.length){var c=st.stock.pop();c.up=true;st.waste.push(c)}else{st.stock=st.waste.reverse().map(function(c){c.up=false;return c});st.waste=[]}}
+function ksWon(st){return st.found.every(function(f){return f.length===13})}
+function play(st){for(var it=0;it<3000;it++){var moved=false;
+ if(ksTap(st,{from:"waste"}))moved=true;
+ for(var c=0;c<7&&!moved;c++){var col=st.tab[c];for(var i=0;i<col.length&&!moved;i++){if(!col[i].up)continue;
+   var t=col[col.length-1];if(i===col.length-1&&canFound(t,st)){moved=ksTap(st,{from:"tab",col:c,idx:i});break}
+   if(i>0&&!col[i-1].up||i===0&&col[i].r!==13){if(ksTap(st,{from:"tab",col:c,idx:i}))moved=true}}}
+ if(ksWon(st))return true;if(!moved)ksDraw(st);}return ksWon(st)}
+function ksWinnableDeal(){for(var i=0;i<40;i++){var d=ksDeal();var s=JSON.stringify(d);if(play(JSON.parse(s)))return JSON.parse(s)}return ksDeal()}</script><script>var sound=localStorage.getItem("judy_sound")==="1";function upS(){document.getElementById("snd").textContent="Sound: "+(sound?"On":"Off")}upS();document.getElementById("snd").onclick=function(){sound=!sound;localStorage.setItem("judy_sound",sound?"1":"0");upS()};var AC;function beep(f){if(!sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.frequency.value=f||660;g.gain.value=0.08;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+0.25);o.stop(AC.currentTime+0.3)}catch(e){}}function banner(t){var b=document.getElementById("banner");b.innerHTML=t||"";b.style.display=t?"block":"none"}
+var VERSES=["“This is the day the Lord has made; let us rejoice and be glad in it.” — Psalm 118:24","“The Lord is my shepherd; I shall not want.” — Psalm 23:1","“Be still, and know that I am God.” — Psalm 46:10","“I can do all things through Christ who strengthens me.” — Philippians 4:13","“The joy of the Lord is your strength.” — Nehemiah 8:10","“Cast all your anxiety on him because he cares for you.” — 1 Peter 5:7","“Give thanks to the Lord, for he is good.” — Psalm 107:1"];var st,hist=[];
+function save(){localStorage.setItem("judy_ks",JSON.stringify({st:st,hist:hist}))}
+function start(){st=ksWinnableDeal();hist=[];banner("");save();draw()}
+function cardEl(c,top,W,H){var d=document.createElement("div");d.style.top=top+"px";d.style.height=H+"px";var fs=Math.max(24,W*0.32);d.style.fontSize=fs+"px";
+if(!c){d.className="c e";return d}if(!c.up){d.className="c down";return d}d.className="c "+(red(c)?"r":"b");d.innerHTML=RK[c.r]+SU[c.s]+'<span class="big" style="font-size:'+(fs*1.5)+'px">'+SU[c.s]+'</span>';return d}
+function act(f){var snap=JSON.stringify(st);if(f()){hist.push(snap);if(hist.length>100)hist.shift();beep(600);save();draw()}}
+function draw(){var g=document.getElementById("g");g.innerHTML="";var W=Math.min((innerWidth-40)/7.2,(innerHeight-120)/4.2),H=W*1.35,off=Math.max(30,W*0.36),offd=Math.max(14,W*0.15);g.style.maxWidth=(W*7.4)+"px";
+var r1=document.createElement("div");r1.className="row";r1.style.height=(H+6)+"px";
+var s=document.createElement("div");s.className="slot";var e=cardEl(st.stock.length?{up:false}:null,0,W,H);if(!st.stock.length)e.innerHTML="↻";s.appendChild(e);s.onclick=function(){act(function(){if(!st.stock.length&&!st.waste.length)return false;ksDraw(st);return true})};r1.appendChild(s);
+s=document.createElement("div");s.className="slot";s.appendChild(cardEl(st.waste[st.waste.length-1]||null,0,W,H));s.onclick=function(){act(function(){return ksTap(st,{from:"waste"})})};r1.appendChild(s);
+r1.appendChild(Object.assign(document.createElement("div"),{className:"slot"}));
+st.found.forEach(function(f,i){var s=document.createElement("div");s.className="slot";var e=cardEl(f[f.length-1]||null,0,W,H);if(!f.length)e.innerHTML=SU[i];s.appendChild(e);s.onclick=function(){act(function(){return ksTap(st,{from:"found",s:i})})};r1.appendChild(s)});g.appendChild(r1);
+var r2=document.createElement("div");r2.className="row";var maxh=H;st.tab.forEach(function(col,ci){var s=document.createElement("div");s.className="slot";var y=0;
+if(!col.length)s.appendChild(cardEl(null,0,W,H));col.forEach(function(c,i){var e=cardEl(c,y,W,H);e.onclick=function(ev){ev.stopPropagation();act(function(){return ksTap(st,{from:"tab",col:ci,idx:i})})};s.appendChild(e);y+=c.up?off:offd});
+maxh=Math.max(maxh,y+H);r2.appendChild(s)});r2.style.height=maxh+"px";g.appendChild(r2);
+var n=st.found.reduce(function(a,f){return a+f.length},0);document.getElementById("msg").textContent=n+" of 52 cards home";
+if(ksWon(st))banner("🎉 You won!<br><br><i>"+VERSES[Math.floor(Math.random()*VERSES.length)]+"</i>");else banner("")}
+document.getElementById("new").onclick=start;document.getElementById("undo").onclick=function(){var h=hist.pop();if(h){st=JSON.parse(h);save();draw()}};onresize=draw;
+try{var s=JSON.parse(localStorage.getItem("judy_ks"));if(s&&s.st){st=s.st;hist=s.hist||[];draw()}else start()}catch(e){start()}
+</script><script>if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js");</script>
+</body></html>

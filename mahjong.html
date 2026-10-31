@@ -1,0 +1,53 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mahjong</title><style>*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{margin:0;height:100%;background:#1f4a3a;color:#fff;font-family:Verdana,Arial,sans-serif;font-size:24px}
+.bar{display:flex;gap:10px;padding:8px;background:#163528;flex-wrap:wrap;align-items:center}
+.bar button,.bar a{font-size:26px;padding:12px 18px;border-radius:12px;border:3px solid #fff;background:#fdf6e3;color:#111;text-decoration:none;font-weight:bold;min-height:60px}
+.bar .msg{flex:1;min-width:200px;font-size:26px;text-align:center}
+.banner{display:none;margin:10px auto;max-width:700px;background:#fdf6e3;color:#111;border-radius:16px;padding:18px;text-align:center;font-size:28px}
+#board{position:relative;margin:10px auto}
+.t{position:absolute;background:#fdf6e3;border:3px solid #6b4f2a;border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:4px 4px 0 #8a6d3b;color:#000}
+.t.free{background:#fffdf5}.t.blocked{filter:brightness(.68)}
+.t.sel{background:#ffe066;border-color:#c00}.t.hint{background:#9fe8a6}
+</style></head><body><div class="bar"><a href="index.html">⌂ Menu</a><button id="new">New Game</button><button id="undo">↶ Undo</button><span class="msg" id="msg"></span><button id="snd">Sound: Off</button></div><div class="banner" id="banner"></div><div style="text-align:center"><button id="hintb" class="bb">💡 Hint</button> <button id="shuf" class="bb">🔀 Shuffle</button></div><div id="board"></div>
+<style>.bb{font-size:26px;padding:10px 22px;border-radius:12px;border:3px solid #fff;background:#fdf6e3;font-weight:bold;margin:6px}</style>
+<script>var FACES=["🌸","🍎","🐟","🌙","⭐","🍀","🐦","🌻","🍇","❤️","🔔","🍋","🐞","☀️","🦋","🌷"];
+function layout(){var p=[];for(var r=0;r<5;r++)for(var c=0;c<8;c++)p.push({x:c,y:r,z:0});
+for(r=1;r<4;r++)for(c=1;c<7;c++)p.push({x:c,y:r,z:1});
+for(c=2;c<6;c++)p.push({x:c,y:2,z:2});return p;}
+function isFree(t,tiles){if(t.gone)return false;var L=false,R=false;
+for(var i=0;i<tiles.length;i++){var o=tiles[i];if(o.gone||o===t)continue;
+if(o.z===t.z+1&&o.x===t.x&&o.y===t.y)return false;
+if(o.z===t.z&&o.y===t.y){if(o.x===t.x-1)L=true;if(o.x===t.x+1)R=true;}}return !(L&&R);}
+// assign faces by reverse removal => guaranteed solvable
+function assign(tiles,rnd){rnd=rnd||Math.random;var live=tiles.filter(function(t){return !t.gone});
+for(var tries=0;tries<500;tries++){var tmp=live.map(function(t){return {x:t.x,y:t.y,z:t.z,gone:false,ref:t}});
+var ok=true,k=0;var pairs=[];
+while(tmp.some(function(t){return !t.gone})){var fr=tmp.filter(function(t){return isFree(t,tmp)});
+if(fr.length<2){ok=false;break;}var a=fr.splice(Math.floor(rnd()*fr.length),1)[0];var b=fr[Math.floor(rnd()*fr.length)];
+a.gone=b.gone=true;pairs.push([a,b]);}
+if(ok){var fs=[];pairs.forEach(function(p,i){var f=FACES[Math.floor(rnd()*FACES.length)];p[0].ref.f=f;p[1].ref.f=f;});assign.last=pairs.map(function(p){return [p[0].ref,p[1].ref]});return true;}}return false;}
+function newDeal(rnd){var t=layout();t.forEach(function(x,i){x.id=i;x.gone=false});assign(t,rnd);return t;}
+function hint(tiles){var fr=tiles.filter(function(t){return isFree(t,tiles)});for(var i=0;i<fr.length;i++)for(var j=i+1;j<fr.length;j++)if(fr[i].f===fr[j].f)return [fr[i],fr[j]];return null;}
+</script>
+<script>var sound=localStorage.getItem("judy_sound")==="1";function upS(){document.getElementById("snd").textContent="Sound: "+(sound?"On":"Off")}upS();document.getElementById("snd").onclick=function(){sound=!sound;localStorage.setItem("judy_sound",sound?"1":"0");upS()};var AC;function beep(f){if(!sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.frequency.value=f||660;g.gain.value=0.08;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+0.25);o.stop(AC.currentTime+0.3)}catch(e){}}function banner(t){var b=document.getElementById("banner");b.innerHTML=t||"";b.style.display=t?"block":"none"}
+var tiles,hist,sel=null,hl=[];
+function save(){localStorage.setItem("judy_mj",JSON.stringify({tiles:tiles,hist:hist}))}
+function start(){tiles=newDeal();hist=[];sel=null;banner("");save();draw()}
+function draw(){var B=document.getElementById("board");var W=Math.min(innerWidth-30,(innerHeight-190)*8/5*0.75);var tw=Math.floor(W/8.3),th=Math.floor(tw*1.3);
+B.style.width=(tw*8+20)+"px";B.style.height=(th*5+20)+"px";B.innerHTML="";
+tiles.slice().sort(function(a,b){return a.z-b.z}).forEach(function(t){if(t.gone)return;var d=document.createElement("div");var f=isFree(t,tiles);
+d.className="t "+(f?"free":"blocked")+(sel===t.id?" sel":"")+(hl.indexOf(t.id)>=0?" hint":"");
+d.style.left=(t.x*tw-t.z*6)+"px";d.style.top=(t.y*th-t.z*6)+"px";d.style.width=(tw-4)+"px";d.style.height=(th-4)+"px";d.style.fontSize=Math.max(24,tw*0.6)+"px";d.textContent=t.f;
+d.onclick=function(){tap(t)};B.appendChild(d)});
+var left=tiles.filter(function(t){return !t.gone}).length;document.getElementById("msg").textContent=left+" tiles left";
+if(left===0)banner("🎉 You cleared the board! Wonderful! <br>Tap New Game to play again.");else if(!hint(tiles))banner("No more matches. Tap 🔀 Shuffle to keep playing.");else banner("")}
+function tap(t){hl=[];if(!isFree(t,tiles))return;if(sel===null||sel===t.id){sel=sel===t.id?null:t.id;draw();return}
+var s=tiles[sel];if(s.f===t.f){s.gone=t.gone=true;hist.push({ids:[s.id,t.id]});sel=null;beep(880);save()}else{sel=t.id}draw()}
+document.getElementById("new").onclick=start;
+document.getElementById("undo").onclick=function(){var h=hist.pop();if(!h)return;if(h.ids)h.ids.forEach(function(i){tiles[i].gone=false});else tiles.forEach(function(t,i){t.f=h.faces[i]});sel=null;hl=[];save();draw()};
+document.getElementById("hintb").onclick=function(){var h=hint(tiles);hl=h?[h[0].id,h[1].id]:[];draw()};
+document.getElementById("shuf").onclick=function(){hist.push({faces:tiles.map(function(t){return t.f})});assign(tiles);sel=null;hl=[];save();draw()};
+onresize=draw;
+try{var s=JSON.parse(localStorage.getItem("judy_mj"));if(s&&s.tiles){tiles=s.tiles;hist=s.hist||[];draw()}else start()}catch(e){start()}
+</script><script>if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js");</script>
+</body></html>
