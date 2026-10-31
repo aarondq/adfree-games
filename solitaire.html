@@ -1,15 +1,39 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Solitaire</title><style>*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
-html,body{margin:0;height:100%;background:#1f4a3a;color:#fff;font-family:Verdana,Arial,sans-serif;font-size:24px}
-.bar{display:flex;gap:10px;padding:8px;background:#163528;flex-wrap:wrap;align-items:center}
-.bar button,.bar a{font-size:26px;padding:12px 18px;border-radius:12px;border:3px solid #fff;background:#fdf6e3;color:#111;text-decoration:none;font-weight:bold;min-height:60px}
-.bar .msg{flex:1;min-width:200px;font-size:26px;text-align:center}
-.banner{display:none;margin:10px auto;max-width:700px;background:#fdf6e3;color:#111;border-radius:16px;padding:18px;text-align:center;font-size:28px}
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bible Solitaire</title><style>*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{margin:0;height:100%;font-family:Georgia,"Times New Roman",serif;font-size:24px;color:#fff}
+body{background:var(--tbl);transition:background .3s}
+body.t0{--tbl:radial-gradient(ellipse at center,#2f6b4f,#173d2c)}
+body.t1{--tbl:radial-gradient(ellipse at center,#8a5a33,#4a2c15)}
+body.t2{--tbl:radial-gradient(ellipse at center,#3f5f8f,#1e2f4f)}
+body.t3{--tbl:radial-gradient(ellipse at center,#7a4f7f,#3d2240)}
+.bar{display:flex;gap:10px;padding:8px;background:rgba(0,0,0,.35);flex-wrap:wrap;align-items:center}
+.bar button,.bar a{font-family:inherit;font-size:24px;padding:10px 16px;border-radius:12px;border:3px solid #e9d8a6;background:#fdf6e3;color:#3b2a10;text-decoration:none;font-weight:bold;min-height:60px;min-width:60px}
+.bar .msg{flex:1;min-width:180px;font-size:24px;text-align:center;color:#fdf3c8}
 #g{padding:8px;margin:auto}.row{display:flex;gap:1.2%;margin-bottom:12px}.slot{flex:1;position:relative}
-.c{position:absolute;left:0;right:0;border-radius:10px;border:2px solid #333;background:#fff;font-weight:bold;padding:2px 6px;line-height:1.05}
-.c.r{color:#c00000}.c.b{color:#000}.c.down{background:repeating-linear-gradient(45deg,#2b5a8a,#2b5a8a 8px,#3d74ad 8px,#3d74ad 16px);border-color:#fff}
-.c.e{background:transparent;border:3px dashed #8fb8a5;color:#8fb8a5;text-align:center}
+.c{position:absolute;left:0;right:0;border-radius:10px;border:2px solid #6b5a3a;background:#fffdf5;font-weight:bold;padding:2px 6px;line-height:1.05;font-family:Verdana,Arial,sans-serif}
+.c.r{color:#b00000}.c.b{color:#111}
+.c.down{border-color:#fff;display:flex;align-items:center;justify-content:center;color:#fff8d8}
+.c.down.k0{background:linear-gradient(135deg,#7a1f1f,#a8322e)}
+.c.down.k1{background:linear-gradient(135deg,#1f3f7a,#2e5ea8)}
+.c.down.k2{background:linear-gradient(135deg,#1f6a4a,#2e9a6a)}
+.c.down.k3{background:linear-gradient(135deg,#8a6a10,#c9a227)}
+.c.down.k4{background:linear-gradient(135deg,#4a2a6a,#7a4aa8)}
+.c.down::after{content:attr(data-sym);font-size:1.3em;text-shadow:0 0 6px rgba(255,240,180,.8)}
+.c.e{background:rgba(255,255,255,.06);border:3px dashed #e9d8a6;color:#e9d8a6;text-align:center;opacity:.8}
 .c .big{display:block;text-align:center}
-</style></head><body><div class="bar"><a href="index.html">⌂ Menu</a><button id="new">New Game</button><button id="undo">↶ Undo</button><span class="msg" id="msg"></span><button id="snd">Sound: Off</button></div><div class="banner" id="banner"></div><div id="g"></div>
+.c.hint{box-shadow:0 0 0 6px #ffd94a,0 0 22px 8px #ffd94a}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:9}
+.ov.on{display:flex}
+.book{background:#fdf6e3;color:#3b2a10;border-radius:18px;padding:26px 34px;max-width:860px;width:92%;max-height:90vh;overflow:auto;text-align:center;border:6px solid #7a4a1f;box-shadow:0 10px 40px #000}
+.book h2{margin:4px 0 10px;font-size:34px;color:#7a1f1f}
+.verse{font-size:30px;line-height:1.45;font-style:italic;margin:14px 0}
+.ref{font-size:26px;font-weight:bold;color:#5a3a10}
+.book button{font-family:inherit;font-size:28px;padding:14px 26px;border-radius:14px;border:3px solid #7a4a1f;background:#7a1f1f;color:#fff;font-weight:bold;margin:10px 8px;min-height:64px}
+.book button.alt{background:#fdf6e3;color:#3b2a10}
+.list{text-align:left;font-size:24px}.list p{border-bottom:1px solid #d9c9a0;padding:8px 0;margin:0}
+.locked{color:#9a8a6a}
+.opts{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}.opt{width:110px;height:140px;border-radius:12px;border:4px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:40px;color:#fff}.opt.sel{border-color:#ffd94a;box-shadow:0 0 0 4px #7a1f1f}
+</style></head><body class="t0"><div class="bar"><a href="index.html">⌂ Menu</a><button id="new">New Game</button><button id="undo">↶ Undo</button><button id="hint">💡 Hint</button><span class="msg" id="msg"></span><button id="verses">📖 My Verses</button><button id="look">🎨</button><button id="snd">Sound: Off</button></div><div id="g"></div>
+<div class="ov" id="ov"><div class="book" id="book"></div></div>
 <script>var SU=["♠","♥","♦","♣"],RK=["","A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 function red(c){return c.s===1||c.s===2}
 function ksDeal(rnd){rnd=rnd||Math.random;var d=[];for(var s=0;s<4;s++)for(var r=1;r<=13;r++)d.push({s:s,r:r,up:false});
@@ -40,25 +64,81 @@ function play(st){for(var it=0;it<3000;it++){var moved=false;
    var t=col[col.length-1];if(i===col.length-1&&canFound(t,st)){moved=ksTap(st,{from:"tab",col:c,idx:i});break}
    if(i>0&&!col[i-1].up||i===0&&col[i].r!==13){if(ksTap(st,{from:"tab",col:c,idx:i}))moved=true}}}
  if(ksWon(st))return true;if(!moved)ksDraw(st);}return ksWon(st)}
-function ksWinnableDeal(){for(var i=0;i<40;i++){var d=ksDeal();var s=JSON.stringify(d);if(play(JSON.parse(s)))return JSON.parse(s)}return ksDeal()}</script><script>var sound=localStorage.getItem("judy_sound")==="1";function upS(){document.getElementById("snd").textContent="Sound: "+(sound?"On":"Off")}upS();document.getElementById("snd").onclick=function(){sound=!sound;localStorage.setItem("judy_sound",sound?"1":"0");upS()};var AC;function beep(f){if(!sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.frequency.value=f||660;g.gain.value=0.08;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+0.25);o.stop(AC.currentTime+0.3)}catch(e){}}function banner(t){var b=document.getElementById("banner");b.innerHTML=t||"";b.style.display=t?"block":"none"}
-var VERSES=["“This is the day the Lord has made; let us rejoice and be glad in it.” — Psalm 118:24","“The Lord is my shepherd; I shall not want.” — Psalm 23:1","“Be still, and know that I am God.” — Psalm 46:10","“I can do all things through Christ who strengthens me.” — Philippians 4:13","“The joy of the Lord is your strength.” — Nehemiah 8:10","“Cast all your anxiety on him because he cares for you.” — 1 Peter 5:7","“Give thanks to the Lord, for he is good.” — Psalm 107:1"];var st,hist=[];
-function save(){localStorage.setItem("judy_ks",JSON.stringify({st:st,hist:hist}))}
-function start(){st=ksWinnableDeal();hist=[];banner("");save();draw()}
+function ksWinnableDeal(){for(var i=0;i<40;i++){var d=ksDeal();var s=JSON.stringify(d);if(play(JSON.parse(s)))return JSON.parse(s)}return ksDeal()}</script><script>
+var V=[["The LORD is my shepherd; I shall not want.","Psalm 23:1"],
+["In the beginning God created the heaven and the earth.","Genesis 1:1"],
+["For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.","John 3:16"],
+["Be still, and know that I am God.","Psalm 46:10"],
+["I can do all things through Christ which strengtheneth me.","Philippians 4:13"],
+["This is the day which the LORD hath made; we will rejoice and be glad in it.","Psalm 118:24"],
+["Trust in the LORD with all thine heart; and lean not unto thine own understanding.","Proverbs 3:5"],
+["The joy of the LORD is your strength.","Nehemiah 8:10"],
+["Casting all your care upon him; for he careth for you.","1 Peter 5:7"],
+["O give thanks unto the LORD; for he is good: for his mercy endureth for ever.","Psalm 107:1"],
+["Come unto me, all ye that labour and are heavy laden, and I will give you rest.","Matthew 11:28"],
+["The LORD bless thee, and keep thee: The LORD make his face shine upon thee, and be gracious unto thee.","Numbers 6:24-25"],
+["Thy word is a lamp unto my feet, and a light unto my path.","Psalm 119:105"],
+["God is our refuge and strength, a very present help in trouble.","Psalm 46:1"],
+["And we know that all things work together for good to them that love God.","Romans 8:28"],
+["Peace I leave with you, my peace I give unto you.","John 14:27"],
+["They that wait upon the LORD shall renew their strength; they shall mount up with wings as eagles.","Isaiah 40:31"],
+["The LORD is my light and my salvation; whom shall I fear?","Psalm 27:1"],
+["Rejoice in the Lord alway: and again I say, Rejoice.","Philippians 4:4"],
+["I will lift up mine eyes unto the hills, from whence cometh my help.","Psalm 121:1"],
+["Weeping may endure for a night, but joy cometh in the morning.","Psalm 30:5"],
+["Fear thou not; for I am with thee: be not dismayed; for I am thy God.","Isaiah 41:10"],
+["Love is patient","1 Corinthians 13:4"],
+["The grass withereth, the flower fadeth: but the word of our God shall stand for ever.","Isaiah 40:8"],
+["Jesus Christ the same yesterday, and to day, and for ever.","Hebrews 13:8"],
+["Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever.","Psalm 23:6"],
+["Delight thyself also in the LORD; and he shall give thee the desires of thine heart.","Psalm 37:4"],
+["It is of the LORD'S mercies that we are not consumed, because his compassions fail not. They are new every morning.","Lamentations 3:22-23"],
+["Let every thing that hath breath praise the LORD.","Psalm 150:6"],
+["I am the way, the truth, and the life.","John 14:6"],
+["The Lord is nigh unto all them that call upon him.","Psalm 145:18"],
+["He healeth the broken in heart, and bindeth up their wounds.","Psalm 147:3"]];
+V[22]=["Charity suffereth long, and is kind; charity envieth not.","1 Corinthians 13:4"];
+var BACKS=[["✝","Crimson Cross"],["🕊","Blue Dove"],["🌿","Olive Branch"],["👑","Golden Crown"],["⭐","Star of Bethlehem"]],TABLES=["Green Felt","Wooden Study","Evening Blue","Royal Purple"];
+var P={wins:0,back:0,tbl:0};try{P=Object.assign(P,JSON.parse(localStorage.getItem("judy_bs_prog"))||{})}catch(e){}
+function saveP(){localStorage.setItem("judy_bs_prog",JSON.stringify(P))}
+function unlockedBacks(){return Math.min(BACKS.length,1+Math.floor(P.wins/3))}function unlockedTables(){return Math.min(TABLES.length,1+Math.floor(P.wins/5))}
+function applyLook(){document.body.className="t"+P.tbl}applyLook();
+var sound=localStorage.getItem("judy_sound")==="1";function upS(){document.getElementById("snd").textContent="Sound: "+(sound?"On":"Off")}upS();document.getElementById("snd").onclick=function(){sound=!sound;localStorage.setItem("judy_sound",sound?"1":"0");upS()};var AC;function beep(f){if(!sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.frequency.value=f||660;g.gain.value=0.08;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+0.25);o.stop(AC.currentTime+0.3)}catch(e){}}
+function show(h){document.getElementById("book").innerHTML=h;document.getElementById("ov").classList.add("on")}function hide(){document.getElementById("ov").classList.remove("on")}
+var st,hist=[],credited=false;
+function save(){localStorage.setItem("judy_ks",JSON.stringify({st:st,hist:hist,cr:credited}))}
+function start(){st=ksWinnableDeal();hist=[];credited=false;hint=null;hide();save();draw()}
+var hint=null;
 function cardEl(c,top,W,H){var d=document.createElement("div");d.style.top=top+"px";d.style.height=H+"px";var fs=Math.max(24,W*0.32);d.style.fontSize=fs+"px";
-if(!c){d.className="c e";return d}if(!c.up){d.className="c down";return d}d.className="c "+(red(c)?"r":"b");d.innerHTML=RK[c.r]+SU[c.s]+'<span class="big" style="font-size:'+(fs*1.5)+'px">'+SU[c.s]+'</span>';return d}
-function act(f){var snap=JSON.stringify(st);if(f()){hist.push(snap);if(hist.length>100)hist.shift();beep(600);save();draw()}}
+if(!c){d.className="c e";return d}if(!c.up){d.className="c down k"+P.back;d.setAttribute("data-sym",BACKS[P.back][0]);return d}d.className="c "+(red(c)?"r":"b");d.innerHTML=RK[c.r]+SU[c.s]+'<span class="big" style="font-size:'+(fs*1.5)+'px">'+SU[c.s]+'</span>';return d}
+function act(f){var snap=JSON.stringify(st);if(f()){hist.push(snap);if(hist.length>200)hist.shift();hint=null;beep(600);save();draw()}}
+function findHint(){var t=JSON.stringify(st);function tries(w){var c=JSON.parse(t);return ksTap(c,w)}
+for(var ci=0;ci<7;ci++){var col=st.tab[ci];if(col.length&&canFound(col[col.length-1],st))return{from:"tab",col:ci,idx:col.length-1}}
+if(st.waste.length&&tries({from:"waste"}))return{from:"waste"};
+for(ci=0;ci<7;ci++){col=st.tab[ci];for(var i=0;i<col.length;i++){if(!col[i].up)continue;if(i===0&&col[i].r===13)break;if(i>0&&col[i-1].up)continue;if(tries({from:"tab",col:ci,idx:i}))return{from:"tab",col:ci,idx:i};break}}
+return{from:"stock"}}
+function allUp(){return !st.stock.length&&!st.waste.length&&st.tab.every(function(c){return c.every(function(x){return x.up})})}
+function autoFinish(){if(ksWon(st)||!allUp())return;var moved=false;for(var ci=0;ci<7;ci++){var col=st.tab[ci];if(col.length&&canFound(col[col.length-1],st)){var c=col.pop();st.found[c.s].push(c);moved=true;break}}if(moved){save();draw();setTimeout(autoFinish,180)}}
 function draw(){var g=document.getElementById("g");g.innerHTML="";var W=Math.min((innerWidth-40)/7.2,(innerHeight-120)/4.2),H=W*1.35,off=Math.max(30,W*0.36),offd=Math.max(14,W*0.15);g.style.maxWidth=(W*7.4)+"px";
 var r1=document.createElement("div");r1.className="row";r1.style.height=(H+6)+"px";
-var s=document.createElement("div");s.className="slot";var e=cardEl(st.stock.length?{up:false}:null,0,W,H);if(!st.stock.length)e.innerHTML="↻";s.appendChild(e);s.onclick=function(){act(function(){if(!st.stock.length&&!st.waste.length)return false;ksDraw(st);return true})};r1.appendChild(s);
-s=document.createElement("div");s.className="slot";s.appendChild(cardEl(st.waste[st.waste.length-1]||null,0,W,H));s.onclick=function(){act(function(){return ksTap(st,{from:"waste"})})};r1.appendChild(s);
+var s=document.createElement("div");s.className="slot";var e=cardEl(st.stock.length?{up:false}:null,0,W,H);if(!st.stock.length)e.innerHTML="↻";if(hint&&hint.from==="stock")e.classList.add("hint");s.appendChild(e);s.onclick=function(){act(function(){if(!st.stock.length&&!st.waste.length)return false;ksDraw(st);return true})};r1.appendChild(s);
+s=document.createElement("div");s.className="slot";e=cardEl(st.waste[st.waste.length-1]||null,0,W,H);if(hint&&hint.from==="waste")e.classList.add("hint");s.appendChild(e);s.onclick=function(){act(function(){return ksTap(st,{from:"waste"})})};r1.appendChild(s);
 r1.appendChild(Object.assign(document.createElement("div"),{className:"slot"}));
 st.found.forEach(function(f,i){var s=document.createElement("div");s.className="slot";var e=cardEl(f[f.length-1]||null,0,W,H);if(!f.length)e.innerHTML=SU[i];s.appendChild(e);s.onclick=function(){act(function(){return ksTap(st,{from:"found",s:i})})};r1.appendChild(s)});g.appendChild(r1);
 var r2=document.createElement("div");r2.className="row";var maxh=H;st.tab.forEach(function(col,ci){var s=document.createElement("div");s.className="slot";var y=0;
-if(!col.length)s.appendChild(cardEl(null,0,W,H));col.forEach(function(c,i){var e=cardEl(c,y,W,H);e.onclick=function(ev){ev.stopPropagation();act(function(){return ksTap(st,{from:"tab",col:ci,idx:i})})};s.appendChild(e);y+=c.up?off:offd});
+if(!col.length)s.appendChild(cardEl(null,0,W,H));col.forEach(function(c,i){var e=cardEl(c,y,W,H);if(hint&&hint.from==="tab"&&hint.col===ci&&i>=hint.idx)e.classList.add("hint");e.onclick=function(ev){ev.stopPropagation();act(function(){return ksTap(st,{from:"tab",col:ci,idx:i})})};s.appendChild(e);y+=c.up?off:offd});
 maxh=Math.max(maxh,y+H);r2.appendChild(s)});r2.style.height=maxh+"px";g.appendChild(r2);
-var n=st.found.reduce(function(a,f){return a+f.length},0);document.getElementById("msg").textContent=n+" of 52 cards home";
-if(ksWon(st))banner("🎉 You won!<br><br><i>"+VERSES[Math.floor(Math.random()*VERSES.length)]+"</i>");else banner("")}
-document.getElementById("new").onclick=start;document.getElementById("undo").onclick=function(){var h=hist.pop();if(h){st=JSON.parse(h);save();draw()}};onresize=draw;
-try{var s=JSON.parse(localStorage.getItem("judy_ks"));if(s&&s.st){st=s.st;hist=s.hist||[];draw()}else start()}catch(e){start()}
+var n=st.found.reduce(function(a,f){return a+f.length},0);document.getElementById("msg").textContent="Blessing "+(P.wins+1)+" · "+n+" of 52 home";
+if(ksWon(st))won();else if(allUp())setTimeout(autoFinish,250)}
+function won(){var v,idx;if(!credited){credited=true;idx=P.wins%V.length;P.wins++;var nb=P.wins%3===0&&P.wins/3<BACKS.length,nt=P.wins%5===0&&P.wins/5<TABLES.length;saveP();save();beep(880);setTimeout(function(){beep(1100)},200)}else{idx=(P.wins-1)%V.length}
+v=V[idx];var extra="";if(credited&&P.wins%3===0&&P.wins/3<BACKS.length)extra+="<p>🎁 New card design: <b>"+BACKS[P.wins/3][1]+"</b> "+BACKS[P.wins/3][0]+"</p>";if(P.wins%5===0&&P.wins/5<TABLES.length)extra+="<p>🎁 New table: <b>"+TABLES[P.wins/5]+"</b></p>";
+show('<h2>📖 Blessing '+P.wins+' Revealed!</h2><div class="verse">“'+v[0]+'”</div><div class="ref">— '+v[1]+' (KJV)</div>'+extra+'<button onclick="start()">Next Game</button><button class="alt" onclick="hide()">Close</button>')}
+function versesView(){var h='<h2>📖 My Verses</h2><p>You have collected '+Math.min(P.wins,V.length)+' of '+V.length+' verses.</p><div class="list">';for(var i=0;i<V.length;i++){h+=i<P.wins?'<p>✝ “'+V[i][0]+'” <b>— '+V[i][1]+'</b></p>':'<p class="locked">🔒 Verse '+(i+1)+' — win a game to reveal</p>'}show(h+'</div><button onclick="hide()">Close</button>')}
+function lookView(){var h='<h2>🎨 Choose Your Cards</h2><div class="opts">';var ub=unlockedBacks();BACKS.forEach(function(b,i){h+=i<ub?'<div class="opt c down k'+i+(P.back===i?' sel':'')+'" style="position:static" onclick="P.back='+i+';saveP();lookView();draw()">'+b[0]+'</div>':'<div class="opt" style="background:#ccc">🔒</div>'});
+h+='</div><h2>Table</h2><div class="opts">';var ut=unlockedTables();TABLES.forEach(function(t,i){h+=i<ut?'<button class="'+(P.tbl===i?'':'alt')+'" onclick="P.tbl='+i+';saveP();applyLook();lookView()">'+t+'</button>':'<button class="alt" disabled>🔒 '+t+'</button>'});
+show(h+'</div><p style="font-size:22px">Win games to unlock more designs (new cards every 3 wins, new tables every 5 wins).</p><button onclick="hide()">Close</button>')}
+document.getElementById("new").onclick=start;document.getElementById("undo").onclick=function(){var h=hist.pop();if(h){st=JSON.parse(h);hint=null;save();draw()}};
+document.getElementById("hint").onclick=function(){hint=findHint();draw()};document.getElementById("verses").onclick=versesView;document.getElementById("look").onclick=lookView;onresize=draw;
+try{var sv=JSON.parse(localStorage.getItem("judy_ks"));if(sv&&sv.st){st=sv.st;hist=sv.hist||[];credited=!!sv.cr;draw()}else start()}catch(e){start()}
 </script><script>if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js");</script>
 </body></html>
